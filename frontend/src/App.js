@@ -8,6 +8,13 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import './App.css';
+
+import Nav from './components/Nav';
+import Home from './components/Home';
+import Tweets from './components/Tweets';
+import { BrowserRouter as Router, Route, Routes} from "react-router-dom";
+
+
 const locales = {
   "en-US": require("date-fns/locale/en-US")
 }
@@ -46,6 +53,7 @@ function App() {
 
   const [newEvent, setNewEvent] = useState({title: "", start: "", end: ""});
   const [allEvents, setAllEvents] = useState(events); // default is the hardcoded events
+  const [list, setList] = useState([]);
 
   // const calendarId = process.env.REACT_APP_CALENDAR_ID;
   // const apiKey = process.env.REACT_APP_GOOGLE_API_KEY;
@@ -68,16 +76,47 @@ function App() {
 
 
   return (
+    <Router>
     <div className="App">
+      
+      <Nav />
+      <Routes>
+        <Route path="/" element={<Home/>} />
+        <Route path="/tweets" element={<Tweets/>} />
+      </Routes>
+
       <h1>Isaac's Calendar</h1>
 
       <button style={{margin: "10px"}} onClick={handlePrintEvents}>Print Events</button>
       <button style={{margin: "10px"}} onClick={handleFetchEvents}>Fetch Events</button>
 
       <h2>Add New Event</h2>
+
+      <div>
+        <h1>Things to Learn</h1>
+        <button
+          type="button"
+          onClick={() => {
+            fetch("http://localhost:8000/")
+            .then(response => response.json())
+            .then(payload => {
+              console.log(payload);
+              setList(payload);
+            })
+          }}
+          >Fetch List</button>
+
+      <ol>
+        {list.map((row, idx) => {
+          return (
+          <li key={idx}><a href={row.url}>{row.label}</a></li>
+          )
+        })}
+      </ol>
+
+      </div>
       
       <div>
-        { /* Text box for event title. Whenever it changes, update newEvent.title to be whatever is in the textbos (e.target.value) */ }
         <input type="text" placeholder="Add Title" style={{width: "20%", marginRight: "10px"}}
           value = {newEvent.title}
           onChange = {(e) => setNewEvent({...newEvent, title: e.target.value})}
@@ -99,7 +138,9 @@ function App() {
       startAccessor="start" 
       endAccessor="end" 
       style={{height: 500, margin: "50px"}}/>
-    </div>
+    
+  </div>
+  </Router>
   );
 }
 
